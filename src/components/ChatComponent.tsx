@@ -29,6 +29,13 @@ const ChatComponent: React.FC = () => {
       setChatHistory([...chatHistory, { question, response: response.data }]);
       setQuestion('');
     } catch (error) {
+      const response: QueryResponse = {
+        answer: "Al momento il servizio non è disponibile. Riprovare più tardi",
+        resources: [
+          
+        ]
+      };
+      setChatHistory([...chatHistory, { question, response: response }]);
       console.error('Error fetching response:', error);
     }
     setLoading(false);
