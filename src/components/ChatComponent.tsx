@@ -55,12 +55,15 @@ const ChatComponent: React.FC = () => {
           <>
             <h2>Resources</h2>
             <ul className="pdf-list">
-              <li>example.pdf</li>
-              <li>example.pdf</li>
-              <li>example.pdf</li>
-              <li>example.pdf</li>
-              <li>another_file.pdf</li>
-              <li>resource3.pdf</li>
+              <li>ITAS-1.pdf</li>
+              <li>ITAS-2.pdf</li>
+              <li>ITAS-3.pdf</li>
+              <li>ITAS-4.pdf</li>
+              <li>ITAS-5.pdf</li>
+              <li>ITAS-6.pdf</li>
+              <li>ITAS-7.pdf</li>
+              <li>ITAS-8.pdf</li>
+            
             </ul>
           </>
         )}
