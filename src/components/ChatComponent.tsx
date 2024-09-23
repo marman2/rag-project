@@ -73,10 +73,10 @@ const ChatComponent: React.FC = () => {
           {chatHistory.map((entry, index) => (
             <div key={index} className="chat-entry">
               <p>
-                <strong>Question:</strong> {entry.question}
+                <strong>Domanda:</strong> {entry.question}
               </p>
               <p>
-                <strong>Answer:</strong> {entry.response.answer}
+                <strong>Risposta:</strong> {entry.response.answer}
               </p>
               <ResourceSection resources={entry.response.resources} />
             </div>
