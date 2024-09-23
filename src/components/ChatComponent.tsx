@@ -113,7 +113,7 @@ const ResourceSection: React.FC<ResourceProps> = ({ resources }) => {
         className="toggle-resources"
         onClick={() => setShowResources(!showResources)}
       >
-        {showResources ? 'Hide Citations' : 'Show Citations'}
+        {showResources ? 'Nascondi Riferimenti' : 'Mostra Riferimenti'}
       </button>
       <div
         className="resource-content"
