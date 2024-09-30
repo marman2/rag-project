@@ -23,7 +23,7 @@ const ChatComponent: React.FC = () => {
     setLoading(true);
     try {
       const response = await axios.post<QueryResponse>(
-        'https://3518-34-80-124-234.ngrok-free.app/query',
+        'https://0924-34-148-119-38.ngrok-free.app/query',
         { question }
       );
       setChatHistory([...chatHistory, { question, response: response.data }]);
