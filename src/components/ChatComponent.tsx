@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import './ChatComponent.css';
 
+
 interface QueryResponse {
   answer: string;
   resources: { source: string; page_number: number }[];
@@ -23,7 +24,7 @@ const ChatComponent: React.FC = () => {
     setLoading(true);
     try {
       const response = await axios.post<QueryResponse>(
-        'https://0924-34-148-119-38.ngrok-free.app/query',
+        'https://0042-35-231-128-184.ngrok-free.app/query',
         { question }
       );
       setChatHistory([...chatHistory, { question, response: response.data }]);
@@ -55,15 +56,14 @@ const ChatComponent: React.FC = () => {
           <>
             <h2>Resources</h2>
             <ul className="pdf-list">
-              <li>ITAS-1.pdf</li>
-              <li>ITAS-2.pdf</li>
-              <li>ITAS-3.pdf</li>
-              <li>ITAS-4.pdf</li>
-              <li>ITAS-5.pdf</li>
-              <li>ITAS-6.pdf</li>
-              <li>ITAS-7.pdf</li>
-              <li>ITAS-8.pdf</li>
-            
+              {/* Link directly to PDFs in the public folder */}
+              {['ITAS-1.pdf', 'ITAS-2.pdf', 'ITAS-3.pdf', 'ITAS-4.pdf', 'ITAS-5.pdf', 'ITAS-6.pdf', 'ITAS-7.pdf', 'ITAS-8-per-CP.pdf'].map((pdf, index) => (
+                <li key={index}>
+                  <a href={`/pdfs/${pdf}`} target="_blank" rel="noopener noreferrer">
+                    {pdf}
+                  </a>
+                </li>
+              ))}
             </ul>
           </>
         )}
@@ -126,7 +126,9 @@ const ResourceSection: React.FC<ResourceProps> = ({ resources }) => {
         <ul>
           {resources.map((resource, idx) => (
             <li key={idx}>
-              {resource.source} - Page {resource.page_number}
+              <a href={`/pdfs/${resource.source}`} target="_blank" rel="noopener noreferrer">
+                {resource.source} - Page {resource.page_number}
+              </a>
             </li>
           ))}
         </ul>
