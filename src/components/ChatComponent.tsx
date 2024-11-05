@@ -41,6 +41,8 @@ const ChatComponent: React.FC = () => {
 
       // Save session ID to localStorage if it’s in the response headers
       const newSessionId = response.headers['X-Session-ID'];
+
+      console.log(newSessionId)
       if (newSessionId && !sessionId) {
         localStorage.setItem('X-Session-ID', newSessionId);
       }
