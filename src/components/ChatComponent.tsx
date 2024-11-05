@@ -23,10 +23,28 @@ const ChatComponent: React.FC = () => {
 
     setLoading(true);
     try {
+
+      // Retrieve session ID from localStorage if it exists
+      const sessionId = localStorage.getItem('x-session-id');
+
+      // Set up headers with session ID if available
+      const headers = sessionId
+        ? { 'x-session-id': sessionId }
+        : {};
+
+
       const response = await axios.post<QueryResponse>(
         'https://db58-34-86-37-233.ngrok-free.app/query',
-        { question }
+        { question },
+        { headers }
       );
+
+      // Save session ID to localStorage if it’s in the response headers
+      const newSessionId = response.headers['x-session-id'];
+      if (newSessionId && !sessionId) {
+        localStorage.setItem('x-session-id', newSessionId);
+      }
+
       setChatHistory([...chatHistory, { question, response: response.data }]);
       setQuestion('');
     } catch (error) {
