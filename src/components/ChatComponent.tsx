@@ -25,11 +25,11 @@ const ChatComponent: React.FC = () => {
     try {
 
       // Retrieve session ID from localStorage if it exists
-      const sessionId = localStorage.getItem('x-session-id');
+      const sessionId = localStorage.getItem('X-Session-Id');
 
       // Set up headers with session ID if available
       const headers = sessionId
-        ? { 'x-session-id': sessionId }
+        ? { 'X-Session-Id': sessionId }
         : {};
 
 
@@ -40,11 +40,11 @@ const ChatComponent: React.FC = () => {
       );
 
       // Save session ID to localStorage if it’s in the response headers
-      const newSessionId = response.headers['x-session-id'];
+      const newSessionId = response.headers['X-Session-Id'];
 
       console.log(newSessionId)
       if (newSessionId && !sessionId) {
-        localStorage.setItem('x-session-id', newSessionId);
+        localStorage.setItem('X-Session-Id', newSessionId);
       }
 
       setChatHistory([...chatHistory, { question, response: response.data }]);
