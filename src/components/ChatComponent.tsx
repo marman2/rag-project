@@ -34,7 +34,7 @@ const ChatComponent: React.FC = () => {
 
 
       const response = await axios.post<QueryResponse>(
-        'https://51fd-34-86-37-233.ngrok-free.app/query',
+        'https://c9ad-104-197-49-219.ngrok-free.app/query',
         { question },
         { headers }
       );
