@@ -1,6 +1,8 @@
+// src/components/ChatComponent.tsx
 import React, { useState } from 'react';
 import axios from 'axios';
 import './ChatComponent.css';
+
 
 interface QueryResponse {
   answer: string;
@@ -21,16 +23,26 @@ const ChatComponent: React.FC = () => {
 
     setLoading(true);
     try {
+
+      // Retrieve session ID from localStorage if it exists
       const sessionId = localStorage.getItem('X-Session-Id');
-      const headers = sessionId ? { 'X-Session-Id': sessionId } : {};
+
+      // Set up headers with session ID if available
+      const headers = sessionId
+        ? { 'X-Session-Id': sessionId }
+        : {};
+
 
       const response = await axios.post<QueryResponse>(
-        'https://69c3-34-55-16-249.ngrok-free.app/query',
+        'https://92f6-104-199-227-11.ngrok-free.app/query',
         { question },
         { headers }
       );
 
+      // Save session ID to localStorage if it’s in the response headers
       const newSessionId = response.headers['X-Session-Id'];
+
+      console.log(newSessionId)
       if (newSessionId && !sessionId) {
         localStorage.setItem('X-Session-Id', newSessionId);
       }
@@ -40,9 +52,11 @@ const ChatComponent: React.FC = () => {
     } catch (error) {
       const response: QueryResponse = {
         answer: "Al momento il servizio non è disponibile. Riprovare più tardi",
-        resources: []
+        resources: [
+          
+        ]
       };
-      setChatHistory([...chatHistory, { question, response }]);
+      setChatHistory([...chatHistory, { question, response: response }]);
       console.error('Error fetching response:', error);
     }
     setLoading(false);
@@ -62,6 +76,7 @@ const ChatComponent: React.FC = () => {
           <>
             <h2>Resources</h2>
             <ul className="pdf-list">
+              {/* Link directly to PDFs in the public folder */}
               {['ITAS-1.pdf', 'ITAS-2.pdf', 'ITAS-3.pdf', 'ITAS-4.pdf', 'ITAS-5.pdf', 'ITAS-6.pdf', 'ITAS-7.pdf', 'ITAS-8-per-CP.pdf'].map((pdf, index) => (
                 <li key={index}>
                   <a href={`/pdfs/${pdf}`} target="_blank" rel="noopener noreferrer">
@@ -112,16 +127,6 @@ interface ResourceProps {
 const ResourceSection: React.FC<ResourceProps> = ({ resources }) => {
   const [showResources, setShowResources] = useState(false);
 
-  // Deduplicate resources by grouping pages
-  const groupedResources = resources.reduce((acc, resource) => {
-    const { source, page_number } = resource;
-    if (!acc[source]) {
-      acc[source] = [];
-    }
-    acc[source].push(page_number);
-    return acc;
-  }, {} as Record<string, number[]>);
-
   return (
     <div className="resource-section">
       <button
@@ -139,16 +144,10 @@ const ResourceSection: React.FC<ResourceProps> = ({ resources }) => {
         }}
       >
         <ul>
-          {Object.entries(groupedResources).map(([source, pages], idx) => (
+          {resources.map((resource, idx) => (
             <li key={idx}>
-              <a
-                href={`/pdfs/${source}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="resource-link"
-                aria-label={`Open ${source} on pages ${pages.join(', ')}`}
-              >
-                {source} - Pages {pages.join(', ')}
+              <a href={`/pdfs/${resource.source}`} target="_blank" rel="noopener noreferrer">
+                {resource.source} - Page {resource.page_number}
               </a>
             </li>
           ))}

@@ -46,6 +46,16 @@
   background-color: #444444;
 }
 
+.pdf-list a {
+  color: #d1d1d1; /* Match the resource link color */
+  text-decoration: none;
+}
+
+.pdf-list a:hover {
+  color: #4caf50; /* Green for hover */
+  text-decoration: underline;
+}
+
 .chat-container {
   flex: 1;
   display: flex;
@@ -131,3 +141,17 @@
   padding: 5px 0;
   text-align: left;
 }
+
+/* Link styles for better visibility on dark background */
+.resource-link {
+  color: #d1d1d1; /* Light gray for contrast */
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease, text-decoration 0.3s ease;
+}
+
+.resource-link:hover {
+  color: #4caf50; /* Green for hover state */
+  text-decoration: underline; /* Subtle underline on hover */
+}
+
