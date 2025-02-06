@@ -25,7 +25,7 @@ const ChatComponent: React.FC = () => {
       const headers = sessionId ? { 'X-Session-Id': sessionId } : {};
 
       const response = await axios.post<QueryResponse>(
-        'http://localhost/query',
+        'http://stag-smashing-sole.ngrok-free.app/query',
         { question },
         { headers }
       );
