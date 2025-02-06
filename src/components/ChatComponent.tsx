@@ -25,7 +25,7 @@ const ChatComponent: React.FC = () => {
       const headers = sessionId ? { 'X-Session-Id': sessionId } : {};
 
       const response = await axios.post<QueryResponse>(
-        'https://be60-34-34-75-143.ngrok-free.app/query',
+        'http://localhost/query',
         { question },
         { headers }
       );
