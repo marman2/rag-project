@@ -6,7 +6,7 @@ const Header: React.FC = () => {
   return (
     <div className="header">
       <img
-        src="https://www.comune.catania.it/data/logo/Comune-di-catania.jpg"
+        src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Provincia_di_Catania-Stemma.svg/806px-Provincia_di_Catania-Stemma.svg.png"
         alt="Logo"
         className="logo"
       />
