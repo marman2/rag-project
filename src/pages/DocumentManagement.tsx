@@ -9,14 +9,13 @@ import {
   List,
   ListItem,
   ListItemText,
-  ListItemSecondary,
   IconButton,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions
 } from '@mui/material';
-import { Delete as DeleteIcon } from '@mui/icons-material';
+import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
 import { documentService } from '../services/document.service';
 import { Document } from '../types';
 
@@ -25,6 +24,7 @@ export const DocumentManagement = () => {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [editingDocument, setEditingDocument] = useState<Document | null>(null);
 
   const loadDocuments = async () => {
     try {
@@ -39,24 +39,39 @@ export const DocumentManagement = () => {
     loadDocuments();
   }, []);
 
-  const handleAddDocument = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     
     try {
       setError('');
       setLoading(true);
-      await documentService.addDocument({
-        title: formData.get('title') as string,
-        content: formData.get('content') as string
-      });
+
+      if (editingDocument) {
+        await documentService.updateDocument(editingDocument.id, {
+          title: formData.get('title') as string,
+          content: formData.get('content') as string
+        });
+      } else {
+        await documentService.addDocument({
+          title: formData.get('title') as string,
+          content: formData.get('content') as string
+        });
+      }
+
       setOpen(false);
+      setEditingDocument(null);
       loadDocuments();
     } catch (err) {
-      setError('Failed to add document');
+      setError(`Failed to ${editingDocument ? 'update' : 'add'} document`);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleEdit = async (doc: Document) => {
+    setEditingDocument(doc);
+    setOpen(true);
   };
 
   const handleDeleteDocument = async (id: number) => {
@@ -66,6 +81,12 @@ export const DocumentManagement = () => {
     } catch (err) {
       setError('Failed to delete document');
     }
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setEditingDocument(null);
+    setError('');
   };
 
   return (
@@ -89,13 +110,23 @@ export const DocumentManagement = () => {
               <ListItem
                 key={doc.id}
                 secondaryAction={
-                  <IconButton
-                    edge="end"
-                    aria-label="delete"
-                    onClick={() => handleDeleteDocument(doc.id)}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
+                  <Box>
+                    <IconButton
+                      edge="end"
+                      aria-label="edit"
+                      onClick={() => handleEdit(doc)}
+                      sx={{ mr: 1 }}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton
+                      edge="end"
+                      aria-label="delete"
+                      onClick={() => handleDeleteDocument(doc.id)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Box>
                 }
               >
                 <ListItemText
@@ -107,9 +138,11 @@ export const DocumentManagement = () => {
           </List>
         </Paper>
 
-        <Dialog open={open} onClose={() => setOpen(false)}>
-          <DialogTitle>Add New Document</DialogTitle>
-          <Box component="form" onSubmit={handleAddDocument}>
+        <Dialog open={open} onClose={handleClose}>
+          <DialogTitle>
+            {editingDocument ? 'Edit Document' : 'Add New Document'}
+          </DialogTitle>
+          <Box component="form" onSubmit={handleSubmit}>
             <DialogContent>
               {error && (
                 <Typography color="error" gutterBottom>
@@ -125,6 +158,7 @@ export const DocumentManagement = () => {
                 type="text"
                 fullWidth
                 required
+                defaultValue={editingDocument?.title || ''}
               />
               <TextField
                 margin="dense"
@@ -135,12 +169,13 @@ export const DocumentManagement = () => {
                 rows={4}
                 fullWidth
                 required
+                defaultValue={editingDocument?.content || ''}
               />
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setOpen(false)}>Cancel</Button>
+              <Button onClick={handleClose}>Cancel</Button>
               <Button type="submit" disabled={loading}>
-                {loading ? 'Adding...' : 'Add Document'}
+                {loading ? (editingDocument ? 'Updating...' : 'Adding...') : (editingDocument ? 'Update' : 'Add')}
               </Button>
             </DialogActions>
           </Box>

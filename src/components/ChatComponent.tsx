@@ -1,112 +1,226 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
-import './ChatComponent.css';
+import { Button } from './ui/button';
+import { ScrollArea } from './ui/scroll-area';
+import { cn } from '../lib/utils';
+import { Send, MessageCircle, FileText, ExternalLink } from "lucide-react";
+import { FeedbackDialog } from "@/components/FeedbackDialog";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { useAuth } from '../contexts/AuthProvider';
+
+interface Message {
+  id: number;
+  content: string;
+  timestamp: string;
+  sender: 'user' | 'assistant';
+  resources?: Resource[];
+}
+
+interface Resource {
+  source: string;
+  page_number: string | number;
+}
 
 interface QueryResponse {
   answer: string;
-  resources: { source: string; page_number: number }[];
+  resources: Resource[];
 }
 
+const mockMessages: Message[] = [
+  {
+    id: 1,
+    content: "Hello! How can I help you today?",
+    sender: "assistant",
+    timestamp: "2024-02-27T10:00:00",
+  },
+  {
+    id: 2,
+    content: "I have a question about the project requirements.",
+    sender: "user",
+    timestamp: "2024-02-27T10:01:00",
+  },
+  {
+    id: 3,
+    content: "Sure, I'd be happy to help. What would you like to know?",
+    sender: "assistant",
+    timestamp: "2024-02-27T10:01:30",
+  },
+];
+
 const ChatComponent: React.FC = () => {
-  const [question, setQuestion] = useState('');
-  const [chatHistory, setChatHistory] = useState<
-    { question: string; response: QueryResponse }[]
-  >([]);
-  const [loading, setLoading] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [sessionId, setSessionId] = useState<string>('');
+  const { isAuthenticated } = useAuth();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (question.trim() === '') return;
+  // Initialize session ID
+  useEffect(() => {
+    const newSessionId = localStorage.getItem('chatSessionId') || crypto.randomUUID();
+    localStorage.setItem('chatSessionId', newSessionId);
+    setSessionId(newSessionId);
+  }, []);
 
-    setLoading(true);
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const handleFeedbackSubmit = async (rating: number, comment: string) => {
     try {
-      const sessionId = localStorage.getItem('X-Session-Id');
-      const headers = sessionId ? { 'X-Session-Id': sessionId } : {};
+      const response = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ rating, comment }),
+      });
 
-      const response = await axios.post<QueryResponse>(
-        'https://stag-smashing-sole.ngrok-free.app/query',
-        { question },
-        { headers }
-      );
-
-      const newSessionId = response.headers['X-Session-Id'];
-      if (newSessionId && !sessionId) {
-        localStorage.setItem('X-Session-Id', newSessionId);
+      if (!response.ok) {
+        throw new Error('Failed to submit feedback');
       }
-
-      setChatHistory([...chatHistory, { question, response: response.data }]);
-      setQuestion('');
     } catch (error) {
-      const response: QueryResponse = {
-        answer: "Al momento il servizio non è disponibile. Riprovare più tardi",
-        resources: []
-      };
-      setChatHistory([...chatHistory, { question, response }]);
-      console.error('Error fetching response:', error);
+      console.error('Error submitting feedback:', error);
+      throw error;
     }
-    setLoading(false);
   };
 
-  const toggleSidebar = () => {
-    setSidebarCollapsed(!sidebarCollapsed);
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!input.trim() || isLoading) return;
+
+    const userMessage: Message = {
+      id: Date.now(),
+      content: input,
+      timestamp: new Date().toISOString(),
+      sender: 'user'
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+    setIsLoading(true);
+
+    try {
+      const response = await axios.post<QueryResponse>(
+        'http://localhost:5002/query', 
+        { question: input },
+        { 
+          headers: { 
+            'Content-Type': 'application/json',
+            'x-session-id': sessionId
+          } 
+        }
+      );
+
+      // Store the new session ID if it was returned
+      const returnedSessionId = response.headers['x-session-id'];
+      if (returnedSessionId) {
+        localStorage.setItem('chatSessionId', returnedSessionId);
+        setSessionId(returnedSessionId);
+      }
+
+      const assistantMessage: Message = {
+        id: Date.now() + 1,
+        content: response.data.answer,
+        timestamp: new Date().toISOString(),
+        sender: 'assistant',
+        resources: response.data.resources
+      };
+
+      setMessages(prev => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error('Error querying API:', error);
+      
+      const errorMessage: Message = {
+        id: Date.now() + 1,
+        content: 'Sorry, I encountered an error processing your request. Please try again.',
+        timestamp: new Date().toISOString(),
+        sender: 'assistant'
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="app-container">
-      <div className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
-        <button className="toggle-button" onClick={toggleSidebar}>
-          {sidebarCollapsed ? '>' : '<'}
-        </button>
-        {!sidebarCollapsed && (
-          <>
-            <h2>Resources</h2>
-            <ul className="pdf-list">
-              {['ITAS-1.pdf', 'ITAS-2.pdf', 'ITAS-3.pdf', 'ITAS-4.pdf', 'ITAS-5.pdf', 'ITAS-6.pdf', 'ITAS-7.pdf', 'ITAS-8-per-CP.pdf'].map((pdf, index) => (
-                <li key={index}>
-                  <a href={`/pdfs/${pdf}`} target="_blank" rel="noopener noreferrer">
-                    {pdf}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
+    <div className="container mx-auto p-4 max-w-4xl">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Document Chat</h1>
+        <FeedbackDialog onSubmit={handleFeedbackSubmit} />
       </div>
-      <div className="chat-container">
-        <div className="chat-window">
-          {chatHistory.map((entry, index) => (
-            <div key={index} className="chat-entry">
-              <p>
-                <b>Domanda:</b> {entry.question}
-              </p>
-              <p>
-                <b>Risposta:</b> {entry.response.answer}
-              </p>
-              <ResourceSection resources={entry.response.resources} />
-            </div>
-          ))}
-          {loading && <div className="loading">Loading...</div>}
+      
+      <Card className="mb-4">
+        <div className="h-[60vh] overflow-auto p-4">
+          <div className="space-y-4">
+            {messages.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-[50vh] text-center space-y-4">
+                <div className="w-32 h-32 mb-4">
+                  <img
+                    src="https://i.ibb.co/qtdDszD/New-Project.png"
+                    alt="Chat Logo"
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <h2 className="text-2xl font-semibold">Welcome to Document Chat</h2>
+                <p className="text-muted-foreground max-w-sm">
+                  Ask questions about your uploaded documents. Our AI assistant will provide answers based on the content of your files.
+                </p>
+              </div>
+            ) : (
+              messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div
+                    className={`rounded-lg p-4 max-w-[80%] ${
+                      message.sender === 'user'
+                        ? 'bg-primary text-primary-foreground ml-auto'
+                        : 'bg-muted'
+                    }`}
+                  >
+                    <p className="whitespace-pre-line">{message.content}</p>
+                    {message.resources && message.resources.length > 0 && (
+                      <ResourceSection resources={message.resources} />
+                    )}
+                    <p className={`text-xs mt-1 ${
+                      message.sender === 'user'
+                        ? 'text-primary-foreground/70'
+                        : 'text-muted-foreground'
+                    }`}>
+                      {new Date(message.timestamp).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              ))
+            )}
+            <div ref={messagesEndRef} />
+          </div>
         </div>
-        <form onSubmit={handleSubmit} className="chat-form">
-          <input
-            type="text"
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            placeholder="Send a message"
-            className="chat-input"
-          />
-          <button type="submit" className="send-button">
-            Send
-          </button>
-        </form>
-      </div>
+      </Card>
+
+      <form onSubmit={handleSubmit} className="flex gap-2">
+        <Input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Ask a question about your documents..."
+          className="flex-1"
+          disabled={isLoading}
+        />
+        <Button type="submit" disabled={!input.trim() || isLoading}>
+          {isLoading ? 'Sending...' : 'Send'}
+        </Button>
+      </form>
     </div>
   );
 };
 
 interface ResourceProps {
-  resources: { source: string; page_number: number }[];
+  resources: Resource[];
 }
 
 const ResourceSection: React.FC<ResourceProps> = ({ resources }) => {
@@ -122,37 +236,42 @@ const ResourceSection: React.FC<ResourceProps> = ({ resources }) => {
     return acc;
   }, {} as Record<string, number[]>);
 
+  if (resources.length === 0) return null;
+
   return (
-    <div className="resource-section">
-      <button
-        className="toggle-resources"
+    <div className="mt-2 border-t pt-2">
+      <Button
+        variant="ghost"
+        size="sm"
         onClick={() => setShowResources(!showResources)}
+        className="text-sm flex items-center"
       >
-        {showResources ? 'Nascondi Riferimenti' : 'Mostra Riferimenti'}
-      </button>
+        <FileText className="h-4 w-4 mr-1" />
+        {showResources ? 'Hide References' : 'Show References'} ({resources.length})
+      </Button>
       <div
-        className="resource-content"
-        style={{
-          maxHeight: showResources ? '200px' : '0',
-          overflow: 'hidden',
-          transition: 'max-height 0.3s ease',
-        }}
+        className={cn(
+          "overflow-hidden transition-all duration-300",
+          showResources ? "max-h-48" : "max-h-0"
+        )}
       >
-        <ul>
-          {Object.entries(groupedResources).map(([source, pages], idx) => (
-            <li key={idx}>
+        <ScrollArea className="max-h-48">
+          <div className="space-y-1 p-2">
+            {Object.entries(groupedResources).map(([source, pages], idx) => (
               <a
-                href={`/pdfs/${source}`}
+                key={idx}
+                href={`http://localhost:5002/pdfs/${source}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="resource-link"
-                aria-label={`Open ${source} on pages ${pages.join(', ')}`}
+                className="block text-sm hover:text-primary transition-colors flex items-center"
               >
+                <FileText className="h-3 w-3 mr-1" />
                 {source} - Pages {pages.join(', ')}
+                <ExternalLink className="h-3 w-3 ml-1" />
               </a>
-            </li>
-          ))}
-        </ul>
+            ))}
+          </div>
+        </ScrollArea>
       </div>
     </div>
   );

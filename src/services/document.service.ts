@@ -16,6 +16,11 @@ export const documentService = {
     return [...mockDocuments];
   },
 
+  getDocumentById: async (id: number): Promise<Document | undefined> => {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return mockDocuments.find(doc => doc.id === id);
+  },
+
   addDocument: async (doc: Omit<Document, 'id' | 'createdAt'>): Promise<Document> => {
     await new Promise(resolve => setTimeout(resolve, 500));
     
@@ -27,6 +32,23 @@ export const documentService = {
     
     mockDocuments.push(newDoc);
     return newDoc;
+  },
+
+  updateDocument: async (id: number, updates: Partial<Omit<Document, 'id' | 'createdAt'>>): Promise<Document> => {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    const index = mockDocuments.findIndex(doc => doc.id === id);
+    if (index === -1) {
+      throw new Error('Document not found');
+    }
+
+    const updatedDoc = {
+      ...mockDocuments[index],
+      ...updates
+    };
+
+    mockDocuments[index] = updatedDoc;
+    return updatedDoc;
   },
 
   deleteDocument: async (id: number): Promise<void> => {

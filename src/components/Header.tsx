@@ -1,17 +1,17 @@
 // src/components/Header.tsx
 import React from 'react';
-import './Header.css';
+import { cn } from '../lib/utils';
 
 const Header: React.FC = () => {
   return (
-    <div className="header">
+    <header className="flex items-center px-6 py-3 bg-card border-b">
       <img
         src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Provincia_di_Catania-Stemma.svg/806px-Provincia_di_Catania-Stemma.svg.png"
         alt="Logo"
-        className="logo"
+        className="h-10 mr-4"
       />
-      <h1>Poc - Assistente digitale</h1>
-    </div>
+      <h1 className="text-2xl font-light">Poc - Assistente digitale</h1>
+    </header>
   );
 };
 
