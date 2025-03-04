@@ -17,9 +17,20 @@ import {
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthProvider';
+
+// Simple Progress component since we don't have the ui/progress module
+const Progress = ({ value = 0, className = "" }: { value?: number, className?: string }) => {
+  return (
+    <div className={`w-full bg-muted rounded-full h-2 ${className}`}>
+      <div 
+        className="bg-primary h-full rounded-full transition-all duration-300" 
+        style={{ width: `${value}%` }}
+      />
+    </div>
+  );
+};
 
 interface Document {
   source: string;

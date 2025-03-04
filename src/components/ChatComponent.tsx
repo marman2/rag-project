@@ -9,6 +9,21 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { useAuth } from '../contexts/AuthProvider';
 
+// Helper function to generate a UUID that works in all environments
+function generateUUID() {
+  // If crypto.randomUUID is available, use it
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  
+  // Fallback implementation
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
 interface Message {
   id: number;
   content: string;
@@ -59,7 +74,8 @@ const ChatComponent: React.FC = () => {
 
   // Initialize session ID
   useEffect(() => {
-    const newSessionId = localStorage.getItem('chatSessionId') || crypto.randomUUID();
+    const storedSessionId = localStorage.getItem('chatSessionId');
+    const newSessionId = storedSessionId || generateUUID();
     localStorage.setItem('chatSessionId', newSessionId);
     setSessionId(newSessionId);
   }, []);
