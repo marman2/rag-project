@@ -50,7 +50,7 @@ export const UserManagement = () => {
       setIsLoading(true);
       setError(null);
       
-      const response = await axios.get('http://localhost:5002/users', {
+      const response = await axios.get('http://localhost:5000/users', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -100,7 +100,7 @@ export const UserManagement = () => {
     setError(null);
 
     try {
-      await axios.post('http://localhost:5002/register', newUser, {
+      await axios.post('http://localhost:5000/register', newUser, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`

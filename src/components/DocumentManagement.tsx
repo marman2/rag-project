@@ -58,7 +58,7 @@ export const DocumentManagement = () => {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await axios.get('http://localhost:5002/list_documents');
+      const response = await axios.get('http://localhost:5000/list_documents');
       setDocuments(response.data.documents || []);
     } catch (err) {
       console.error('Error fetching documents:', err);
@@ -96,7 +96,7 @@ export const DocumentManagement = () => {
     setError(null);
 
     try {
-      await axios.post('http://localhost:5002/add_document', formData, {
+      await axios.post('http://localhost:5000/add_document', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${token}`
@@ -133,7 +133,7 @@ export const DocumentManagement = () => {
     if (!documentToDelete || !token) return;
 
     try {
-      await axios.delete(`http://localhost:5002/delete_document/${documentToDelete}`, {
+      await axios.delete(`http://localhost:5000/delete_document/${documentToDelete}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
