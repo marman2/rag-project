@@ -56,7 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Optional: Verify token with backend
       // This would be a lightweight API call to validate the token
-      // const response = await axios.get('http://localhost:5000/verify-token');
+      // const response = await axios.get('http://backend:5000/verify-token');
       // return response.status === 200;
       
       return true;
@@ -100,7 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (username: string, password: string) => {
     try {
-      const response = await axios.post('http://localhost:5000/login', 
+      const response = await axios.post('http://backend:5000/login', 
         new URLSearchParams({
           'username': username,
           'password': password

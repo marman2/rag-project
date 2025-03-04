@@ -121,7 +121,7 @@ const ChatComponent: React.FC = () => {
 
     try {
       const response = await axios.post<QueryResponse>(
-        'http://localhost:5000/query', 
+        'http://backend:5000/query', 
         { question: input },
         { 
           headers: { 
@@ -279,7 +279,7 @@ const ResourceSection: React.FC<ResourceProps> = ({ resources }) => {
             {Object.entries(groupedResources).map(([source, pages], idx) => (
               <a
                 key={idx}
-                href={`http://localhost:5000/pdfs/${source}`}
+                href={`http://backend:5000/pdfs/${source}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block text-sm hover:text-primary transition-colors flex items-center"
