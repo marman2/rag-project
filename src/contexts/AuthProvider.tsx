@@ -54,9 +54,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(userData);
       setIsAuthenticated(true);
       
-      // Optional: Verify token with localhost
+      // Optional: Verify token with 192.168.30.4
       // This would be a lightweight API call to validate the token
-      // const response = await axios.get('http://localhost:5000/verify-token');
+      // const response = await axios.get('http://192.168.30.4:5000/verify-token');
       // return response.status === 200;
       
       return true;
@@ -100,7 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (username: string, password: string) => {
     try {
-      const response = await axios.post('http://localhost:5000/login', 
+      const response = await axios.post('http://192.168.30.4:5000/login', 
         new URLSearchParams({
           'username': username,
           'password': password
