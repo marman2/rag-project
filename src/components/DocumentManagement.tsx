@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Upload, Trash2, FileText, AlertCircle, Plus } from "lucide-react";
+import { FileUp } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -7,10 +7,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button, buttonVariants, type ButtonProps } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -19,11 +17,9 @@ import {
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Progress } from "@/components/ui/progress";
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthProvider';
-import { FileUp } from 'lucide-react';
-import { Label } from '@/components/ui/label';
 
 interface Document {
   source: string;
@@ -40,6 +36,7 @@ export const DocumentManagement = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
+
   const { token } = useAuth();
 
   // Use useCallback to memoize the fetchDocuments function
@@ -66,11 +63,10 @@ export const DocumentManagement = () => {
   }, [fetchDocuments]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files && files.length > 0) {
-      const file = files[0];
+    if (event.target.files && event.target.files.length > 0) {
+      const file = event.target.files[0];
       if (file.type !== 'application/pdf') {
-        setError('Only PDF files are supported.');
+        setError('Only PDF files are supported');
         return;
       }
       setSelectedFile(file);
@@ -79,17 +75,14 @@ export const DocumentManagement = () => {
   };
 
   const handleUpload = async () => {
-    if (!selectedFile) {
-      setError('Please select a file to upload.');
-      return;
-    }
-
-    setIsUploading(true);
-    setUploadProgress(0);
-    setError(null);
+    if (!selectedFile || !token) return;
 
     const formData = new FormData();
     formData.append('file', selectedFile);
+    
+    setIsUploading(true);
+    setUploadProgress(0);
+    setError(null);
 
     try {
       await axios.post('http://localhost:5002/add_document', formData, {
@@ -99,8 +92,8 @@ export const DocumentManagement = () => {
         },
         onUploadProgress: (progressEvent) => {
           if (progressEvent.total) {
-            const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            setUploadProgress(progress);
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            setUploadProgress(percentCompleted);
           }
         }
       });
@@ -112,9 +105,9 @@ export const DocumentManagement = () => {
       
       // Refresh document list
       fetchDocuments();
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error uploading document:', err);
-      setError(err.response?.data?.detail || 'Failed to upload document. Please try again.');
+      setError('Failed to upload document. Please try again.');
     } finally {
       setIsUploading(false);
     }
@@ -126,8 +119,8 @@ export const DocumentManagement = () => {
   };
 
   const handleDelete = async () => {
-    if (!documentToDelete) return;
-    
+    if (!documentToDelete || !token) return;
+
     try {
       await axios.delete(`http://localhost:5002/delete_document/${documentToDelete}`, {
         headers: {
@@ -135,24 +128,24 @@ export const DocumentManagement = () => {
         }
       });
       
-      // Close dialog and refresh list
+      // Remove from local state
+      setDocuments(documents.filter(doc => doc.source !== documentToDelete));
       setDeleteConfirmOpen(false);
       setDocumentToDelete(null);
-      fetchDocuments();
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error deleting document:', err);
-      setError(err.response?.data?.detail || 'Failed to delete document. Please try again.');
+      setError('Failed to delete document. Please try again.');
     }
   };
 
   // Group documents by source
-  const documentsBySource: Record<string, Document[]> = {};
-  documents.forEach(doc => {
-    if (!documentsBySource[doc.source]) {
-      documentsBySource[doc.source] = [];
+  const groupedDocuments = documents.reduce((acc, doc) => {
+    if (!acc[doc.source]) {
+      acc[doc.source] = [];
     }
-    documentsBySource[doc.source].push(doc);
-  });
+    acc[doc.source].push(doc);
+    return acc;
+  }, {} as Record<string, Document[]>);
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">
@@ -161,48 +154,51 @@ export const DocumentManagement = () => {
       <Card className="mb-6">
         <CardHeader>
           <CardTitle>Upload Document</CardTitle>
-          <CardDescription>Upload PDF documents to be used for answering questions.</CardDescription>
+          <CardDescription>Upload PDF documents to be used for question answering.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col space-y-4">
-            <Input
-              id="file-upload"
-              type="file"
-              accept=".pdf"
-              onChange={handleFileChange}
-              disabled={isUploading}
-            />
-            {selectedFile && (
-              <p className="text-sm">Selected: {selectedFile.name}</p>
-            )}
+            <div className="grid w-full max-w-sm items-center gap-1.5">
+              <input
+                id="file-upload"
+                type="file"
+                accept=".pdf"
+                onChange={handleFileChange}
+                className="hidden"
+                disabled={isUploading}
+              />
+              <div className="flex items-center gap-4">
+                <label
+                  htmlFor="file-upload"
+                  className="flex h-10 w-full cursor-pointer items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-sm font-medium ring-offset-background hover:bg-accent hover:text-accent-foreground"
+                >
+                  <FileUp className="mr-2 h-4 w-4" />
+                  {selectedFile ? selectedFile.name : 'Select PDF file'}
+                </label>
+                <Button 
+                  onClick={handleUpload} 
+                  disabled={!selectedFile || isUploading}
+                  className="w-24"
+                >
+                  {isUploading ? 'Uploading...' : 'Upload'}
+                </Button>
+              </div>
+            </div>
+            
             {isUploading && (
-              <div className="w-full bg-muted rounded-full h-2.5">
-                <div 
-                  className="bg-primary h-2.5 rounded-full" 
-                  style={{ width: `${uploadProgress}%` }}
-                ></div>
+              <div className="space-y-2">
+                <Progress value={uploadProgress} className="h-2 w-full" />
+                <p className="text-xs text-muted-foreground text-right">{uploadProgress}%</p>
               </div>
             )}
+            
             {error && (
-              <div className="flex items-center text-destructive text-sm">
-                <AlertCircle className="h-4 w-4 mr-2" />
-                {error}
-              </div>
+              <p className="text-sm text-destructive">{error}</p>
             )}
           </div>
         </CardContent>
-        <CardFooter>
-          <Button 
-            onClick={handleUpload} 
-            disabled={!selectedFile || isUploading}
-            className="flex items-center"
-          >
-            <FileUp className="mr-2 h-4 w-4" />
-            {isUploading ? 'Uploading...' : 'Upload Document'}
-          </Button>
-        </CardFooter>
       </Card>
-
+      
       <Card>
         <CardHeader>
           <CardTitle>Your Documents</CardTitle>
@@ -215,46 +211,41 @@ export const DocumentManagement = () => {
             </div>
           ) : error ? (
             <div className="text-center py-8 text-destructive">
-              <AlertCircle className="h-8 w-8 mx-auto mb-2" />
-              {error}
+              <p>{error}</p>
             </div>
-          ) : Object.keys(documentsBySource).length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              No documents uploaded yet.
-            </div>
-          ) : (
+          ) : Object.keys(groupedDocuments).length > 0 ? (
             <div className="space-y-4">
-              {Object.entries(documentsBySource).map(([source, docs]) => (
+              {Object.entries(groupedDocuments).map(([source, docs]) => (
                 <div key={source} className="border rounded-lg p-4">
                   <div className="flex justify-between items-center mb-2">
-                    <div className="flex items-center">
-                      <FileText className="h-5 w-5 mr-2 text-primary" />
-                      <h3 className="font-medium">{source}</h3>
-                    </div>
+                    <h3 className="font-medium">{source}</h3>
                     <Button 
-                      variant="destructive" 
+                      variant="outline" 
                       size="sm"
+                      className="text-destructive hover:bg-destructive/10"
                       onClick={() => confirmDelete(source)}
-                      className="h-8"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      Delete
                     </Button>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {docs.length} {docs.length === 1 ? 'page' : 'pages'}
+                    {docs.length} page{docs.length !== 1 ? 's' : ''}
                   </p>
                 </div>
               ))}
             </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              No documents found. Upload a document to get started.
+            </div>
           )}
         </CardContent>
       </Card>
-
-      {/* Delete Confirmation Dialog */}
+      
       <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogTitle>Delete Document</DialogTitle>
             <DialogDescription>
               Are you sure you want to delete "{documentToDelete}"? This action cannot be undone.
             </DialogDescription>

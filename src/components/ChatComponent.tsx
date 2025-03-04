@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Button } from './ui/button';
 import { ScrollArea } from './ui/scroll-area';
 import { cn } from '../lib/utils';
-import { Send, MessageCircle, FileText, ExternalLink } from "lucide-react";
+import { FileText, ExternalLink } from "lucide-react";
 import { FeedbackDialog } from "@/components/FeedbackDialog";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -27,7 +27,8 @@ interface QueryResponse {
   resources: Resource[];
 }
 
-const mockMessages: Message[] = [
+// Example messages for reference
+/* const mockMessages: Message[] = [
   {
     id: 1,
     content: "Hello! How can I help you today?",
@@ -46,7 +47,7 @@ const mockMessages: Message[] = [
     sender: "assistant",
     timestamp: "2024-02-27T10:01:30",
   },
-];
+]; */
 
 const ChatComponent: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -232,7 +233,9 @@ const ResourceSection: React.FC<ResourceProps> = ({ resources }) => {
     if (!acc[source]) {
       acc[source] = [];
     }
-    acc[source].push(page_number);
+    // Convert page_number to number if it's a string
+    const pageNum = typeof page_number === 'string' ? parseInt(page_number, 10) : page_number;
+    acc[source].push(pageNum);
     return acc;
   }, {} as Record<string, number[]>);
 

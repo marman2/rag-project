@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Trash2, AlertCircle, UserPlus, User, Shield } from "lucide-react";
+import { AlertCircle, UserPlus, User, Shield } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -18,7 +18,6 @@ import {
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import axios from 'axios';
@@ -33,9 +32,6 @@ export const UserManagement = () => {
   const [users, setUsers] = useState<UserData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [confirmDeleteDialogOpen, setConfirmDeleteDialogOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
   const [newUser, setNewUser] = useState({
     username: '',
@@ -83,30 +79,6 @@ export const UserManagement = () => {
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
-
-  const handleDelete = (user: UserData) => {
-    setSelectedUser(user);
-    setDeleteDialogOpen(true);
-  };
-
-  const handleConfirmDelete = () => {
-    setDeleteDialogOpen(false);
-    setConfirmDeleteDialogOpen(true);
-  };
-
-  const confirmDelete = async () => {
-    if (selectedUser) {
-      try {
-        // Replace this with your actual API call
-        // await fetch(`/api/users/${selectedUser.id}`, { method: 'DELETE' });
-        setUsers(users.filter((user) => user.username !== selectedUser.username));
-        setConfirmDeleteDialogOpen(false);
-        setSelectedUser(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to delete user');
-      }
-    }
-  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -303,77 +275,6 @@ export const UserManagement = () => {
           )}
         </CardContent>
       </Card>
-
-      {/* First Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete User</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete the user "{selectedUser?.full_name}"?
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="flex space-x-2 justify-end">
-            <Button
-              variant="outline"
-              onClick={() => setDeleteDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleConfirmDelete}
-            >
-              Continue
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Second Delete Confirmation Dialog */}
-      <Dialog open={confirmDeleteDialogOpen} onOpenChange={setConfirmDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Final Confirmation</DialogTitle>
-            <DialogDescription>
-              This action cannot be undone. The user "{selectedUser?.full_name}" will be permanently deleted.
-              Please type "DELETE" to confirm.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex items-center justify-center py-4">
-            <input
-              type="text"
-              className="w-full px-4 py-2 border rounded-md"
-              placeholder="Type DELETE to confirm"
-              onChange={(e) => {
-                const deleteButton = document.getElementById('finalDeleteButton') as HTMLButtonElement;
-                if (deleteButton) {
-                  deleteButton.disabled = e.target.value !== 'DELETE';
-                }
-              }}
-            />
-          </div>
-          <DialogFooter className="flex space-x-2 justify-end">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setConfirmDeleteDialogOpen(false);
-                setSelectedUser(null);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              id="finalDeleteButton"
-              variant="destructive"
-              onClick={confirmDelete}
-              disabled={true}
-            >
-              Delete User
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
-} 
+}; 

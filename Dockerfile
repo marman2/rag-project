@@ -1,14 +1,17 @@
-# Use official Node.js image as the base
-FROM node:18-alpine
+# Build stage
+FROM node:20-alpine AS build
 
 # Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
+# Copy package files
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm ci
+
+# Install Node.js type definitions
+RUN npm install --save-dev @types/node
 
 # Copy the rest of the application
 COPY . .
@@ -16,11 +19,26 @@ COPY . .
 # Build the React app
 RUN npm run build
 
-# Install a lightweight server to serve the build files
-RUN npm install -g serve
+# Production stage
+FROM node:20-alpine AS production
 
-# Expose port 3000 (or the port you want)
+# Set working directory
+WORKDIR /app
+
+# Copy package files for production dependencies
+COPY package*.json ./
+
+# Install only production dependencies
+RUN npm ci --omit=dev
+
+# Install serve locally
+RUN npm install serve
+
+# Copy built app from build stage
+COPY --from=build /app/dist ./dist
+
+# Expose port 3000
 EXPOSE 3000
 
 # Command to serve the app
-CMD ["serve", "-s", "dist", "-l", "3000"]
+CMD ["node_modules/.bin/serve", "-s", "dist", "-l", "3000"]
