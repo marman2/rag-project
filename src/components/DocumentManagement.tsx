@@ -165,7 +165,7 @@ export const DocumentManagement = () => {
       <Card className="mb-6">
         <CardHeader>
           <CardTitle>Upload Document</CardTitle>
-          <CardDescription>Upload PDF documents to be used for question answering.</CardDescription>
+          <CardDescription>Carica documenti PDF</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col space-y-4">
@@ -212,8 +212,8 @@ export const DocumentManagement = () => {
       
       <Card>
         <CardHeader>
-          <CardTitle>Your Documents</CardTitle>
-          <CardDescription>Manage your uploaded documents.</CardDescription>
+          <CardTitle>I tuoi documenti</CardTitle>
+          <CardDescription>Gestione i tuoi documenti caricati.</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -239,15 +239,12 @@ export const DocumentManagement = () => {
                       Delete
                     </Button>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    {docs.length} page{docs.length !== 1 ? 's' : ''}
-                  </p>
                 </div>
               ))}
             </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">
-              No documents found. Upload a document to get started.
+              Non ci sono documenti caricati. Carica un documento per iniziare.
             </div>
           )}
         </CardContent>

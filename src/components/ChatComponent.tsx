@@ -166,7 +166,7 @@ const ChatComponent: React.FC = () => {
   return (
     <div className="container mx-auto p-4 max-w-4xl">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Document Chat</h1>
+        <h1 className="text-2xl font-bold">Chat</h1>
         <FeedbackDialog onSubmit={handleFeedbackSubmit} />
       </div>
       
@@ -182,9 +182,9 @@ const ChatComponent: React.FC = () => {
                     className="w-full h-full object-contain"
                   />
                 </div>
-                <h2 className="text-2xl font-semibold">Welcome to Document Chat</h2>
+                <h2 className="text-2xl font-semibold">Assistente AI per i tuoi documenti</h2>
                 <p className="text-muted-foreground max-w-sm">
-                  Ask questions about your uploaded documents. Our AI assistant will provide answers based on the content of your files.
+                  Fai domande sui tuoi documenti caricati. Il nostro assistente AI ti fornirà risposte basate sul contenuto dei tuoi file.
                 </p>
               </div>
             ) : (
@@ -224,7 +224,7 @@ const ChatComponent: React.FC = () => {
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask a question about your documents..."
+          placeholder="Fai una domanda sui tuoi documenti..."
           className="flex-1"
           disabled={isLoading}
         />

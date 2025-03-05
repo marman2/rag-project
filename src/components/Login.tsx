@@ -42,7 +42,7 @@ export function Login() {
         <CardHeader>
           <CardTitle className="text-2xl">Login</CardTitle>
           <CardDescription>
-            Enter your credentials to access the document chat system
+            Inserisci le tue credenziali per accedere al sistema.
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
@@ -60,7 +60,7 @@ export function Login() {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter your username"
+                placeholder="Inserisci il tuo username"
                 disabled={isLoading}
               />
             </div>
@@ -71,7 +71,7 @@ export function Login() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
+                placeholder="Inserisci la tua password"
                 disabled={isLoading}
               />
             </div>

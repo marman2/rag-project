@@ -137,13 +137,13 @@ export const UserManagement = () => {
       
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>Add New User</CardTitle>
-          <CardDescription>Create user accounts for accessing the document chat system.</CardDescription>
+          <CardTitle>Aggiungi Nuovo Utente</CardTitle>
+          <CardDescription>Crea account utente per accedere alla gestione dei documenti.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col space-y-4">
             <p className="text-sm text-muted-foreground">
-              Click the button below to add a new user with specific permissions.
+              Clicca sul pulsante qui sotto per aggiungere un nuovo utente
             </p>
             {error && (
               <div className="flex items-center text-destructive text-sm">
@@ -232,8 +232,8 @@ export const UserManagement = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Existing Users</CardTitle>
-          <CardDescription>Manage user accounts for the document chat system.</CardDescription>
+          <CardTitle>Utenti Esistenti</CardTitle>
+          <CardDescription>Gestione degli utenti</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (

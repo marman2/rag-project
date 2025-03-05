@@ -53,9 +53,9 @@ export function FeedbackDialog({ onSubmit }: FeedbackDialogProps) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Send Feedback</DialogTitle>
+          <DialogTitle>Invia Feedback</DialogTitle>
           <DialogDescription>
-            Help us improve by sharing your experience.
+            Aiutaci a migliorare condividendo la tua esperienza.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
@@ -83,12 +83,12 @@ export function FeedbackDialog({ onSubmit }: FeedbackDialogProps) {
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="comment">Comment (optional)</Label>
+            <Label htmlFor="comment">Commento (opzionale)</Label>
             <Textarea
               id="comment"
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              placeholder="Share your thoughts..."
+              placeholder="Condividi le tue opinioni..."
               className="min-h-[100px]"
             />
           </div>
@@ -108,7 +108,7 @@ export function FeedbackDialog({ onSubmit }: FeedbackDialogProps) {
             onClick={handleSubmit}
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Submitting..." : "Submit Feedback"}
+            {isSubmitting ? "Submitting..." : "Invia Feedback"}
           </Button>
         </DialogFooter>
       </DialogContent>
